@@ -109,12 +109,14 @@ class _ADA_NUMERIC(NUMERIC):
         def process(value):
             print('bind processing', value, type(value))
             return str(value)
+        print('bound numeric bind processor', dialect)
         return process
 
     def result_processor(self, dialect, coltype):
         def process(value):
             print('result processing', value, type(value))
             return Decimal(value)
+        print('bound numeric result processor', dialect, coltype)
         return process
 
 
@@ -123,10 +125,12 @@ class AuroraPostgresDataAPIDialect(PGDialect):
     driver = "aurora_data_api"
     default_schema_name = None
 
-    supports_native_decimal = True
+    # supports_native_decimal = True
+    print('In aurora postgres dialect')
 
     colspecs = util.update_copy(PGDialect.colspecs, {
         sqltypes.JSON: _ADA_SA_JSON,
+        sqltypes.Numeric: _ADA_NUMERIC,
         JSON: _ADA_JSON,
         JSONB: _ADA_JSONB,
         UUID: _ADA_UUID,
@@ -134,8 +138,7 @@ class AuroraPostgresDataAPIDialect(PGDialect):
         sqltypes.Time: _ADA_TIME,
         sqltypes.DateTime: _ADA_TIMESTAMP,
         sqltypes.Enum: _ADA_ENUM,
-        ARRAY: _ADA_ARRAY,
-        NUMERIC: _ADA_NUMERIC
+        ARRAY: _ADA_ARRAY
     })
     @classmethod
     def dbapi(cls):
