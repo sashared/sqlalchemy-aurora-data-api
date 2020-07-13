@@ -115,7 +115,7 @@ class _ADA_NUMERIC(NUMERIC):
     def result_processor(self, dialect, coltype):
         def process(value):
             print('result processing', value, type(value))
-            return Decimal(value)
+            return Decimal(value) if value is not None else value
         print('bound numeric result processor', dialect, coltype)
         return process
 
