@@ -106,18 +106,21 @@ class _ADA_ARRAY(ARRAY):
 
 class _ADA_NUMERIC(NUMERIC):
     def bind_processor(self, dialect):
-        def process(value):
-            print('bind processing', value, type(value))
-            return str(value)
-        print('bound numeric bind processor', dialect)
-        return process
+        return None
 
     def result_processor(self, dialect, coltype):
-        def process(value):
-            print('result processing', value, type(value))
+        def process_decimal(value):
+            print('processing decimal', value, type(value))
             return Decimal(value) if value is not None else value
-        print('bound numeric result processor', dialect, coltype)
-        return process
+
+        def process_float(value):
+            print('processing float', value, type(value))
+            return float(value) if value is not None else value
+
+        if self.asdecimal:
+            return process_decimal
+        else:
+            return process_float
 
 
 class AuroraPostgresDataAPIDialect(PGDialect):
