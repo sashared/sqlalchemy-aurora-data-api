@@ -110,11 +110,9 @@ class _ADA_NUMERIC(NUMERIC):
 
     def result_processor(self, dialect, coltype):
         def process_decimal(value):
-            print('processing decimal', value, type(value))
             return Decimal(value) if value is not None else value
 
         def process_float(value):
-            print('processing float', value, type(value))
             return float(value) if value is not None else value
 
         if self.asdecimal:
@@ -127,10 +125,6 @@ class AuroraPostgresDataAPIDialect(PGDialect):
     # See https://docs.sqlalchemy.org/en/13/core/internals.html#sqlalchemy.engine.interfaces.Dialect
     driver = "aurora_data_api"
     default_schema_name = None
-
-    # supports_native_decimal = True
-    print('In aurora postgres dialect')
-
     colspecs = util.update_copy(PGDialect.colspecs, {
         sqltypes.JSON: _ADA_SA_JSON,
         sqltypes.Numeric: _ADA_NUMERIC,
