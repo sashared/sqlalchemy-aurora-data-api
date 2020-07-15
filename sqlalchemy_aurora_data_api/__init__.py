@@ -4,10 +4,12 @@ sqlalchemy-aurora-data-api
 
 import json, datetime, re
 
+from decimal import Decimal
+
 from sqlalchemy import cast, func, util
 import sqlalchemy.sql.sqltypes as sqltypes
 from sqlalchemy.dialects.postgresql.base import PGDialect
-from sqlalchemy.dialects.postgresql import JSON, JSONB, UUID, DATE, TIME, TIMESTAMP, ARRAY, ENUM
+from sqlalchemy.dialects.postgresql import JSON, JSONB, UUID, DATE, TIME, TIMESTAMP, ARRAY, ENUM, NUMERIC
 from sqlalchemy.dialects.mysql.base import MySQLDialect
 
 import aurora_data_api
@@ -102,12 +104,30 @@ class _ADA_ARRAY(ARRAY):
         return func.string_to_array(value, "\v")
 
 
+class _ADA_NUMERIC(NUMERIC):
+    def bind_processor(self, dialect):
+        return None
+
+    def result_processor(self, dialect, coltype):
+        def process_decimal(value):
+            return Decimal(value) if value is not None else value
+
+        def process_float(value):
+            return float(value) if value is not None else value
+
+        if self.asdecimal:
+            return process_decimal
+        else:
+            return process_float
+
+
 class AuroraPostgresDataAPIDialect(PGDialect):
     # See https://docs.sqlalchemy.org/en/13/core/internals.html#sqlalchemy.engine.interfaces.Dialect
     driver = "aurora_data_api"
     default_schema_name = None
     colspecs = util.update_copy(PGDialect.colspecs, {
         sqltypes.JSON: _ADA_SA_JSON,
+        sqltypes.Numeric: _ADA_NUMERIC,
         JSON: _ADA_JSON,
         JSONB: _ADA_JSONB,
         UUID: _ADA_UUID,
